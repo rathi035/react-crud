@@ -1,70 +1,236 @@
-# Getting Started with Create React App
+import { useEffect, useState } from "react";
+import Product from "./Product";
+import "./App.css";
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+const App = () =>
+{
 
-## Available Scripts
+    let [products, setProducts] = useState([]);
 
-In the project directory, you can run:
+    let [title, setTitle] = useState("");
 
-### `npm start`
+    let [price, setPrice] = useState("");
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+    let [editId, setEditId] = useState(null);
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
 
-### `npm test`
+    useEffect(() =>
+    {
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+        fetch("https://fakestoreapi.com/products")
 
-### `npm run build`
+        .then((res) => res.json())
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+        .then((res) => setProducts(res))
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+        .catch((e) => console.log(e))
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+    }, [])
 
-### `npm run eject`
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+    const add = () =>
+    {
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+        let data = {
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+            id: products.length + 1,
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+            title: title,
 
-## Learn More
+            price: price
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+        }
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+        setProducts([data, ...products]);
 
-### Code Splitting
+    }
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
 
-### Analyzing the Bundle Size
+    const remove = (id) =>
+    {
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+        setProducts(
 
-### Making a Progressive Web App
+            products.filter((p) => p.id != id)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+        )
 
-### Advanced Configuration
+    }
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
 
-### Deployment
+    const edit = (p) =>
+    {
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+        setTitle(p.title);
 
-### `npm run build` fails to minify
+        setPrice(p.price);
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+        setEditId(p.id);
+
+    }
+
+
+    const update = () =>
+    {
+
+        let newProducts = products.map((p) =>
+        {
+
+            if(p.id == editId)
+            {
+                p.title = title;
+
+                p.price = price;
+            }
+
+            return p;
+
+        })
+
+        setProducts(newProducts);
+
+        setTitle("");
+
+        setPrice("");
+
+        setEditId(null);
+
+    }
+
+
+    return(
+        <>
+
+            <div className="form">
+
+                <h2>CRUD Operations</h2>
+
+                <input
+                    type="text"
+                    placeholder="Enter title"
+                    value={title}
+                    onChange={(e)=> setTitle(e.target.value)}
+                />
+
+                <br /><br />
+
+                <input
+                    type="number"
+                    placeholder="Enter price"
+                    value={price}
+                    onChange={(e)=> setPrice(e.target.value)}
+                />
+
+                <br /><br />
+
+                <button onClick={add}>
+                    Add
+                </button>
+
+                <button onClick={update}>
+                    Update
+                </button>
+
+            </div>
+
+
+            {
+
+                products.map((p)=>
+
+                    <Product
+
+                        id={p.id}
+
+                        title={p.title}
+
+                        price={p.price}
+
+                        remove={remove}
+
+                        edit={edit}
+
+                    />
+
+                )
+
+            }
+
+        </>
+    )
+}
+
+export default App;
+
+
+.form
+{
+    border:2px solid black;
+    width:300px;
+    padding:20px;
+    margin:20px;
+    background-color:lightblue;
+}
+
+.d1
+{
+    border:2px solid black;
+    width:250px;
+    padding:20px;
+    margin:20px;
+    background-color:lightpink;
+    display:inline-block;
+}
+
+button
+{
+    padding:10px;
+    margin:5px;
+}
+
+input
+{
+    width:250px;
+    padding:10px;
+}
+
+import "./App.css";
+
+const Product = ({id, title, price, remove, edit}) =>
+{
+
+    return(
+        <div className="d1">
+
+            <h2>{id}</h2>
+
+            <h3>{title}</h3>
+
+            <h3>Price : {price}</h3>
+
+            <button onClick={() => remove(id)}>
+                Delete
+            </button>
+
+            <button onClick={() => edit({id, title, price})}>
+                Edit
+            </button>
+
+        </div>
+    )
+}
+
+export default Product;
+
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './App';
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
